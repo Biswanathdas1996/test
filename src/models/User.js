@@ -26,6 +26,58 @@ const userSchema = new mongoose.Schema(
       enum: ['client', 'freelancer', 'admin'],
       default: 'client',
     },
+    customerDetails: {
+      dateOfBirth: {
+        type: Date,
+      },
+      fatherName: {
+        type: String,
+        trim: true,
+      },
+      address: {
+        street: String,
+        city: String,
+        state: String,
+        zipCode: String,
+        country: String,
+      },
+      customerDetailsCompleted: {
+        type: Boolean,
+        default: false,
+      },
+    },
+    incomeDetails: {
+      employmentType: {
+        type: String,
+        enum: ['employed', 'self-employed', 'unemployed', 'retired'],
+      },
+      employer: {
+        type: String,
+        trim: true,
+      },
+      monthlyIncome: {
+        type: Number,
+        min: 0,
+      },
+      additionalIncome: {
+        type: Number,
+        min: 0,
+        default: 0,
+      },
+      yearsEmployed: {
+        type: Number,
+        min: 0,
+      },
+      incomeDetailsCompleted: {
+        type: Boolean,
+        default: false,
+      },
+    },
+    loanApplicationStatus: {
+      type: String,
+      enum: ['not_started', 'customer_details_submitted', 'income_details_submitted', 'under_review', 'approved', 'rejected'],
+      default: 'not_started',
+    },
   },
   { timestamps: true }
 );
