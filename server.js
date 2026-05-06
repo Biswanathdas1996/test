@@ -19,6 +19,23 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Root landing page route
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Welcome to Oktawave Loan Origination System',
+    version: '1.0.0',
+    endpoints: {
+      landing: '/api/landing',
+      auth: '/api/auth',
+      health: '/api/health'
+    },
+    callToAction: {
+      text: 'Start Your Loan Application',
+      link: '/api/landing'
+    }
+  });
+});
+
 // Routes
 app.use('/api', routes);
 
