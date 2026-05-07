@@ -87,4 +87,161 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 });
 
+// POST /api/auth/customer-details (protected) - Submit customer details and trigger income form
+router.post(
+  '/customer-details',
+  authMiddleware,
+  [
+    body('fullName').trim().notEmpty().withMessage('Full name is required'),
+    body('phoneNumber').trim().notEmpty().withMessage('Phone number is required'),
+    body('address').trim().notEmpty().withMessage('Address is required'),
+    body('city').trim().notEmpty().withMessage('City is required'),
+    body('state').trim().notEmpty().withMessage('State is required'),
+    body('zipCode').trim().notEmpty().withMessage('Zip code is required'),
+    body('dateOfBirth').isISO8601().withMessage('Valid date of birth is required'),
+    body('ssn').trim().notEmpty().withMessage('SSN is required'),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    const { fullName, phoneNumber, address, city, state, zipCode, dateOfBirth, ssn } = req.body;
+
+    try {
+      const user = await User.findById(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      user.customerDetails = {
+        fullName,
+        phoneNumber,
+        address,
+        city,
+        state,
+        zipCode,
+        dateOfBirth: new Date(dateOfBirth),
+        ssn,
+      };
+      user.formProgress.customerDetailsCompleted = true;
+      user.loanApplicationStatus = 'in-progress';
+
+      await user.save();
+
+      res.status(200).json({
+        message: 'Customer details saved successfully',
+        nextStep: 'income-details',
+        triggerIncomeForm: true,
+        formProgress: user.formProgress,
+        branding: {
+          colors: {
+            primary: '#2DB5DA',
+            secondary: '#939598',
+          },
+          typography: {
+            primaryFont: 'Proxima Nova, sans-serif',
+            secondaryFont: 'Montserrat, sans-serif',
+          },
+        },
+      });
+    } catch (err) {
+      res.status(500).json({ message: 'Server error', error: err.message });
+    }
+  }
+);
+
+// POST /api/auth/income-details (protected) - Submit income details
+router.post(
+  '/income-details',
+  authMiddleware,
+  [
+    body('employmentType')
+      .isIn(['employed', 'self-employed', 'unemployed', 'retired'])
+      .withMessage('Valid employment type is required'),
+    body('annualIncome')
+      .isNumeric()
+      .withMessage('Annual income must be a number'),
+    body('monthlyIncome')
+      .isNumeric()
+      .withMessage('Monthly income must be a number'),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    const {
+      employmentType,
+      employerName,
+      jobTitle,
+      annualIncome,
+      monthlyIncome,
+      additionalIncome,
+      incomeSource,
+    } = req.body;
+
+    try {
+      const user = await User.findById(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      if (!user.formProgress.customerDetailsCompleted) {
+        return res.status(400).json({
+          message: 'Customer details must be completed first',
+          nextStep: 'customer-details',
+        });
+      }
+
+      user.incomeDetails = {
+        employmentType,
+        employerName,
+        jobTitle,
+        annualIncome: Number(annualIncome),
+        monthlyIncome: Number(monthlyIncome),
+        additionalIncome: additionalIncome ? Number(additionalIncome) : 0,
+        incomeSource,
+      };
+      user.formProgress.incomeDetailsCompleted = true;
+      user.loanApplicationStatus = 'submitted';
+
+      await user.save();
+
+      res.status(200).json({
+        message: 'Income details saved successfully',
+        nextStep: 'document-upload',
+        formProgress: user.formProgress,
+        applicationStatus: user.loanApplicationStatus,
+      });
+    } catch (err) {
+      res.status(500).json({ message: 'Server error', error: err.message });
+    }
+  }
+);
+
+// GET /api/auth/form-status (protected) - Get current form completion status
+router.get('/form-status', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({
+      formProgress: user.formProgress,
+      loanApplicationStatus: user.loanApplicationStatus,
+      nextStep: !user.formProgress.customerDetailsCompleted
+        ? 'customer-details'
+        : !user.formProgress.incomeDetailsCompleted
+        ? 'income-details'
+        : 'document-upload',
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
 module.exports = router;
