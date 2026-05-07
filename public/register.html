@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Oktawave Loan Origination System</title>
+    <link rel="stylesheet" href="/css/landing.css">
+    <link rel="stylesheet" href="/css/auth.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Roboto:wght@700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="logo">
+                    <span class="logo-icon">O</span>
+                    <span class="logo-text">Oktawave</span>
+                </div>
+                <h1>Create Your Account</h1>
+                <p>Start your loan application journey</p>
+            </div>
+
+            <form class="auth-form" id="registerForm">
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input
+                        type="text"
+                        id="fullName"
+                        name="fullName"
+                        required
+                        placeholder="John Doe"
+                        aria-required="true"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        required
+                        placeholder="you@example.com"
+                        aria-required="true"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        required
+                        placeholder="Create a strong password"
+                        aria-required="true"
+                        minlength="8"
+                    >
+                    <small class="form-hint">Minimum 8 characters</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        required
+                        placeholder="Confirm your password"
+                        aria-required="true"
+                    >
+                </div>
+
+                <div class="form-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="terms" id="terms" required>
+                        <span>I agree to the <a href="/terms.html" target="_blank" class="link">Terms & Conditions</a></span>
+                    </label>
+                </div>
+
+                <div id="errorMessage" class="error-message" role="alert" aria-live="polite"></div>
+
+                <button type="submit" class="btn btn-primary btn-large btn-block">Create Account</button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Already have an account? <a href="/login.html" class="link">Login</a></p>
+                <p><a href="/" class="link">Back to home</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+</body>
+</html>
